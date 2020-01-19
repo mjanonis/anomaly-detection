@@ -17,7 +17,7 @@ kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
 siamese_train_loader = torch.utils.data.DataLoader(siamese_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
 siamese_test_loader = torch.utils.data.DataLoader(siamese_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
 
-margin = 0.5
+margin = 1.
 embedding_net = ResNextEmbeddingNet()
 model = SiameseNet(embedding_net)
 if cuda:
