@@ -41,7 +41,7 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
 
         if val_loss < lowest_val_loss:
             lowest_val_loss = val_loss
-            torch.save(model.state_dict(), './model{:.4f}.pth'.format(val_loss))
+            torch.save(model.state_dict(), './model0.pth')
 
         for metric in metrics:
             message += '\t{}: {}'.format(metric.name(), metric.value())
