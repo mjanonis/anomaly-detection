@@ -119,7 +119,7 @@ class SiameseXRayParcels(Dataset):
         else:
             img1 = cv2.imread(self.pairs[index][0])
             img2 = cv2.imread(self.pairs[index][1])
-            target = self.pairs[2]
+            target = self.pairs[index][2]
                             
         # Make it so the width of both images match (prefer upscaling)
         if img1.shape[1] > img2.shape[1]:
