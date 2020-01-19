@@ -1,0 +1,5 @@
+ad_venv/ 
+dataset/
+dataset_cropped/
+__pycache__/
+.vscode/
