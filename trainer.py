@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from torch.utils.tensorboard import SummaryWriter
+import sys
 
 
 def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[],
@@ -93,9 +94,12 @@ def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, met
             for metric in metrics:
                 message += '\t{}: {}'.format(metric.name(), metric.value())
 
-            print(message)
+            sys.stdout.write("\r" + message)
+            sys.stdout.flush()
             losses = []
 
+    # Add a new line
+    print()
     total_loss /= (batch_idx + 1)
     return total_loss, metrics
 
