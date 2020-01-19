@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from torch.utils.tensorboard import SummaryWriter
 
 
 def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, metrics=[],
@@ -14,6 +15,7 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
     Online triplet learning: batch loader, embedding model, online triplet loss
     """
 
+    writer = SummaryWriter()
     for epoch in range(start_epoch, n_epochs):
         lowest_val_loss = 100
 
@@ -25,12 +27,16 @@ def fit(train_loader, val_loader, model, loss_fn, optimizer, scheduler, n_epochs
         message = 'Epoch: {}/{}. Train set: Average loss: {:.4f}'.format(epoch + 1, n_epochs, train_loss)
         for metric in metrics:
             message += '\t{}: {}'.format(metric.name(), metric.value())
+        
+        writer.add_scalar('Loss/train', train_loss, epoch)
 
         val_loss, metrics = test_epoch(val_loader, model, loss_fn, cuda, metrics)
         val_loss /= len(val_loader)
 
         message += '\nEpoch: {}/{}. Validation set: Average loss: {:.4f}'.format(epoch + 1, n_epochs,
                                                                                  val_loss)
+
+        writer.add_scalar('Loss/test', val_loss, epoch)
 
         if val_loss < lowest_val_loss:
             lowest_val_loss = val_loss
