@@ -3,3 +3,5 @@ dataset/
 dataset_cropped/
 __pycache__/
 .vscode/
+runs/
+*.pth

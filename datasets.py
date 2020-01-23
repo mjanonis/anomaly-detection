@@ -11,7 +11,11 @@ import torch
 from torch.utils.data import Dataset
 from torch.utils.data.sampler import BatchSampler
 from torchvision.transforms.functional import to_tensor
+from torchvision.transforms import Normalize
 
+from trim import trim_xray_images
+
+CROP_MARGIN = 32
 
 # Returns the index of the top view image in a pair
 def top_view(pair):
@@ -85,10 +89,11 @@ def train_test_csv(root, train_size=0.8):
     
 
 class SiameseXRayParcels(Dataset):
-    def __init__(self, xray_csv, train=True, transform=False):
+    def __init__(self, xray_csv, image_size=224, train=True, transform=False):
         self.train = train
         self.transform = transform
         self.pairs = []
+        self.image_size = image_size
     
         # Read the .csv
         with open(xray_csv, newline='') as csvfile:
@@ -99,7 +104,7 @@ class SiameseXRayParcels(Dataset):
 
     def __getitem__(self,index):
 
-        # Final images have to be 224x224
+        # Final images have to be at least 224x224
    
         if self.train:
             target = np.random.randint(0, 2)
@@ -120,62 +125,59 @@ class SiameseXRayParcels(Dataset):
             img1 = cv2.imread(self.pairs[index][0])
             img2 = cv2.imread(self.pairs[index][1])
             target = int(self.pairs[index][2])
-                            
-        # Make it so the width of both images match (prefer upscaling)
-        if img1.shape[1] > img2.shape[1]:
-            ratio = img1.shape[1]/img2.shape[1]
-            img2 = cv2.resize(img2, (0,0), fx=ratio, fy=ratio)
-        elif img1.shape[1] < img2.shape[1]:
-            ratio = img2.shape[1]/img1.shape[1]
-            img1 = cv2.resize(img1, (0,0), fx=ratio, fy=ratio)
-        
-        # Make sure that each dimension is at least 256 px
-        if img1.shape[0]<256:
-            img1 = cv2.resize(img1, (img1.shape[1], 256))
-        if img1.shape[1]<256:
-            img1 = cv2.resize(img1, (256, img1.shape[0]))
 
-        if img2.shape[0]<256:
-            img2 = cv2.resize(img2, (img2.shape[1], 256))
-        if img2.shape[1]<256:
-            img2 = cv2.resize(img2, (256, img2.shape[0]))
+        img1, img2 = trim_xray_images(img1, img2, self.image_size+CROP_MARGIN, target)
 
+        CROP_TOP_MAX_1 = img1.shape[0] - self.image_size
+        CROP_TOP_MAX_2 = img2.shape[0] - self.image_size
+        CROP_LEFT_MAX_1 = img1.shape[1] - self.image_size
+        CROP_LEFT_MAX_2 = img2.shape[1] - self.image_size
 
-        CROP_TOP_MAX_1 = img1.shape[0] - 224
-        CROP_TOP_MAX_2 = img2.shape[0] - 224
-        CROP_LEFT_MAX = img1.shape[1] - 224
+        print(img1.shape, img2.shape)
 
         if self.train:
             if self.transform:
                 # Apply random cropping
                 top_1 = np.random.randint(0, CROP_TOP_MAX_1)
                 top_2 = np.random.randint(0, CROP_TOP_MAX_2)
-                left = np.random.randint(0, CROP_LEFT_MAX)
+                left_1 = np.random.randint(0, CROP_LEFT_MAX_1)
+                left_2 = np.random.randint(0, CROP_LEFT_MAX_2)
 
-                img1 = img1[top_1:224+top_1, left:224+left]
-                img2 = img2[top_2:224+top_2, left:224+left]
+                img1 = img1[top_1:self.image_size+top_1, left_1:self.image_size+left_1]
+
+                if target:
+                    img2 = img2[top_2:self.image_size+top_2, left_1:self.image_size+left_1]
+                else:
+                    img2 = img2[top_2:self.image_size+top_2, left_2:self.image_size+left_2]
+
             else:
                 # Apply a center crop
                 top_1 = CROP_TOP_MAX_1 // 2
                 top_2 = CROP_TOP_MAX_2 // 2
-                left = CROP_LEFT_MAX // 2
+                left_1 = CROP_LEFT_MAX_1 // 2
+                left_2 = CROP_LEFT_MAX_2 // 2
 
-                img1 = img1[top_1:224+top_1, left:224+left]
-                img2 = img2[top_2:224+top_2, left:224+left]
+                img1 = img1[top_1:self.image_size+top_1, left_1:self.image_size+left_1]
+                img2 = img2[top_2:self.image_size+top_2, left_2:self.image_size+left_2]
 
         else:
             # Apply a center crop
             top_1 = CROP_TOP_MAX_1 // 2
             top_2 = CROP_TOP_MAX_2 // 2
-            left = CROP_LEFT_MAX // 2
+            left_1 = CROP_LEFT_MAX_1 // 2
+            left_2 = CROP_LEFT_MAX_2 // 2
 
-            img1 = img1[top_1:224+top_1, left:224+left]
-            img2 = img2[top_2:224+top_2, left:224+left]
+            img1 = img1[top_1:self.image_size+top_1, left_1:self.image_size+left_1]
+            img2 = img2[top_2:self.image_size+top_2, left_2:self.image_size+left_2]
 
+
+        # Normalize using the mean and std of ImageNet
+        norm = Normalize(mean = [0.485, 0.456, 0.406], std = [0.229, 0.224, 0.225])
+        
         #return (img1, img2), target
 
         # Convert the images to tensors and return
-        return (to_tensor(img1), to_tensor(img2)), target
+        return (norm(to_tensor(img1)), norm(to_tensor(img2))), target
 
 
     def __len__(self):
