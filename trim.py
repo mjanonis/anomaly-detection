@@ -16,9 +16,9 @@ def get_bounding_box(img):
     return x, y, w, h
 
 def trim_xray_images(img1, img2, image_size, label):
-    # add a white border around the images to make sure they are big enough
-    img1 = cv2.copyMakeBorder(img1, image_size, image_size, image_size, image_size, borderType=cv2.BORDER_CONSTANT, value=[255,255,255])
-    img2 = cv2.copyMakeBorder(img2, image_size, image_size, image_size, image_size, borderType=cv2.BORDER_CONSTANT, value=[255,255,255])
+    # add a white border around the images to make sure that there's enough space for cropping
+    img1 = cv2.copyMakeBorder(img1, img2.shape[0] // 2 + image_size, img2.shape[0] // 2 + image_size, img2.shape[1] // 2 + image_size, img2.shape[1] // 2 + image_size, borderType=cv2.BORDER_CONSTANT, value=[255,255,255])
+    img2 = cv2.copyMakeBorder(img2, img1.shape[0] // 2 + image_size, img1.shape[0] // 2 + image_size, img1.shape[1] // 2 + image_size, img1.shape[1] // 2 + image_size, borderType=cv2.BORDER_CONSTANT, value=[255,255,255])
 
     # get bounding box for both images
     x1, y1, w1, h1 = get_bounding_box(img1)
