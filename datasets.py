@@ -133,8 +133,6 @@ class SiameseXRayParcels(Dataset):
         CROP_LEFT_MAX_1 = img1.shape[1] - self.image_size
         CROP_LEFT_MAX_2 = img2.shape[1] - self.image_size
 
-        print(img1.shape, img2.shape)
-
         if self.train:
             if self.transform:
                 # Apply random cropping
