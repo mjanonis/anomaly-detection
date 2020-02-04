@@ -54,7 +54,6 @@ class AccumulatedDistanceAccuracyMetric(Metric):
     def __call__(self, outputs, target, loss):
         pred = distance.PairwiseDistance().forward(outputs[0],outputs[1])
         pred = pred.flatten() < self.margin
-        print(pred, target)
         self.correct += sum(pred == target[0])
         self.total += target[0].size(0)
         return self.value()
