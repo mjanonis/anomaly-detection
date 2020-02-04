@@ -1,4 +1,5 @@
 import numpy as np
+from torch.nn.modules import distance
 
 
 class Metric:
@@ -30,6 +31,31 @@ class AccumulatedAccuracyMetric(Metric):
     def __call__(self, outputs, target, loss):
         pred = outputs[0].data.max(1, keepdim=True)[1]
         self.correct += pred.eq(target[0].data.view_as(pred)).cpu().sum()
+        self.total += target[0].size(0)
+        return self.value()
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+
+    def value(self):
+        return 100 * float(self.correct) / self.total
+
+    def name(self):
+        return 'Accuracy'
+
+class AccumulatedDistanceAccuracyMetric(Metric):
+
+    def __init__(self, margin):
+        self.correct = 0
+        self.total = 0
+        self.margin = margin
+
+    def __call__(self, outputs, target, loss):
+        pred = distance.PairwiseDistance().forward(outputs[0],outputs[1])
+        pred = pred.flatten() < self.margin
+        print(pred, target)
+        self.correct += sum(pred == target[0])
         self.total += target[0].size(0)
         return self.value()
 

@@ -9,7 +9,7 @@ cuda = torch.cuda.is_available()
 from networks import ResNextEmbeddingNet, SiameseNet
 from datasets import SiameseXRayParcels
 from losses import ContrastiveLoss
-from metrics import AccumulatedAccuracyMetric
+from metrics import AccumulatedDistanceAccuracyMetric
 
 siamese_train_dataset = SiameseXRayParcels('train.csv', train=True, transform=True)
 siamese_test_dataset = SiameseXRayParcels('test.csv', train=False, transform=False)
@@ -31,4 +31,4 @@ scheduler = lr_scheduler.StepLR(optimizer, 8, gamma=0.1, last_epoch=-1)
 n_epochs = 20
 log_interval = 10
 
-fit(siamese_train_loader, siamese_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, [AccumulatedAccuracyMetric()])
+fit(siamese_train_loader, siamese_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, [AccumulatedDistanceAccuracyMetric(margin)])
