@@ -96,7 +96,7 @@ def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, met
             for metric in metrics:
                 message += '\t{}: {}'.format(metric.name(), metric.value())
 
-            sys.stdout.write("\033[K") # Clear to the end of line
+            sys.stdout.write("\x1b[2K") # Clear to the end of line
             sys.stdout.write("\r" + message)
             sys.stdout.flush()
             losses = []
