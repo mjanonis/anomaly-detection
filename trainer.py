@@ -68,10 +68,10 @@ def fit(
 
         if val_loss < lowest_val_loss:
             lowest_val_loss = val_loss
-            torch.save(model.state_dict(), "./model{}.pth".format(val_loss))
+            torch.save(model.state_dict(), "./model.pth")
             print(
-                "{} < {}: saving model_state_dict to ./model{}.pth".format(
-                    val_loss, lowest_val_loss, val_loss
+                "{} < {}: saving model_state_dict to ./model.pth".format(
+                    val_loss, lowest_val_loss
                 )
             )
 
