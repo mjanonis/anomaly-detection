@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2019, Adam Bielski
+# Copyright (c) 2020, Martynas Janonis
+
 import torch.nn as nn
 import torch.nn.functional as F
 import torchvision

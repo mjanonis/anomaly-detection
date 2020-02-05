@@ -1,3 +1,7 @@
+# SPDX-License-Identifier: BSD-3-Clause
+# Copyright (c) 2019, Adam Bielski
+# Copyright (c) 2020, Martynas Janonis
+
 import numpy as np
 import cv2
 import os
