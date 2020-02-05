@@ -45,6 +45,10 @@ class AccumulatedAccuracyMetric(Metric):
         return 'Accuracy'
 
 class AccumulatedDistanceAccuracyMetric(Metric):
+    """
+    If the distance between the two outputs is less than the margin,
+    classify as positive; else negative
+    """
 
     def __init__(self, margin):
         self.correct = 0
