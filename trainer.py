@@ -67,13 +67,13 @@ def fit(
         print(message)
 
         if val_loss < lowest_val_loss:
-            lowest_val_loss = val_loss
-            torch.save(model.state_dict(), "./model.pth")
             print(
                 "{} < {}: saving model_state_dict to ./model.pth".format(
                     val_loss, lowest_val_loss
                 )
             )
+            lowest_val_loss = val_loss
+            torch.save(model.state_dict(), "./model.pth")
 
 
 def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, metrics):
