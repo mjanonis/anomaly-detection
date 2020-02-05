@@ -42,7 +42,8 @@ class AccumulatedAccuracyMetric(Metric):
         return 100 * float(self.correct) / self.total
 
     def name(self):
-        return 'Accuracy'
+        return "Accuracy"
+
 
 class AccumulatedDistanceAccuracyMetric(Metric):
     """
@@ -56,7 +57,7 @@ class AccumulatedDistanceAccuracyMetric(Metric):
         self.margin = margin
 
     def __call__(self, outputs, target, loss):
-        pred = distance.PairwiseDistance().forward(outputs[0],outputs[1])
+        pred = distance.PairwiseDistance().forward(outputs[0], outputs[1])
         pred = pred.flatten() < self.margin
         self.correct += sum(pred == target[0])
         self.total += target[0].size(0)
@@ -70,4 +71,4 @@ class AccumulatedDistanceAccuracyMetric(Metric):
         return 100 * float(self.correct) / self.total
 
     def name(self):
-        return 'Accuracy'
+        return "Accuracy"

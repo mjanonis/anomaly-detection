@@ -5,20 +5,25 @@ from torch.autograd import Variable
 
 from trainer import fit
 import numpy as np
+
 cuda = torch.cuda.is_available()
 from networks import ResNextEmbeddingNet, SiameseNet
 from datasets import SiameseXRayParcels
 from losses import ContrastiveLoss
 from metrics import AccumulatedDistanceAccuracyMetric
 
-siamese_train_dataset = SiameseXRayParcels('train.csv', train=True, transform=True)
-siamese_test_dataset = SiameseXRayParcels('test.csv', train=False, transform=False)
+siamese_train_dataset = SiameseXRayParcels("train.csv", train=True, transform=True)
+siamese_test_dataset = SiameseXRayParcels("test.csv", train=False, transform=False)
 batch_size = 1
-kwargs = {'num_workers': 1, 'pin_memory': True} if cuda else {}
-siamese_train_loader = torch.utils.data.DataLoader(siamese_train_dataset, batch_size=batch_size, shuffle=True, **kwargs)
-siamese_test_loader = torch.utils.data.DataLoader(siamese_test_dataset, batch_size=batch_size, shuffle=False, **kwargs)
+kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
+siamese_train_loader = torch.utils.data.DataLoader(
+    siamese_train_dataset, batch_size=batch_size, shuffle=True, **kwargs
+)
+siamese_test_loader = torch.utils.data.DataLoader(
+    siamese_test_dataset, batch_size=batch_size, shuffle=False, **kwargs
+)
 
-margin = 2.
+margin = 2.0
 embedding_net = ResNextEmbeddingNet()
 model = SiameseNet(embedding_net)
 if cuda:
@@ -31,4 +36,15 @@ scheduler = lr_scheduler.StepLR(optimizer, 1, gamma=0.99, last_epoch=-1)
 n_epochs = 50
 log_interval = 10
 
-fit(siamese_train_loader, siamese_test_loader, model, loss_fn, optimizer, scheduler, n_epochs, cuda, log_interval, [AccumulatedDistanceAccuracyMetric(margin // 2)])
+fit(
+    siamese_train_loader,
+    siamese_test_loader,
+    model,
+    loss_fn,
+    optimizer,
+    scheduler,
+    n_epochs,
+    cuda,
+    log_interval,
+    [AccumulatedDistanceAccuracyMetric(margin // 2)],
+)

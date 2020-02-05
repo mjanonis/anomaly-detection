@@ -23,6 +23,7 @@ class ResNextEmbeddingNet(nn.Module):
     def get_embedding(self, x):
         return self.forward(x)
 
+
 class DenseNetEmbeddingNet(nn.Module):
     def __init__(self):
         super(DenseNetEmbeddingNet, self).__init__()
