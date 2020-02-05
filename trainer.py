@@ -32,7 +32,7 @@ def fit(
     """
 
     writer = SummaryWriter()
-    lowest_val_loss = 100
+    lowest_val_loss = float("inf")
     for epoch in range(start_epoch, n_epochs):
 
         # Train stage
@@ -60,15 +60,20 @@ def fit(
 
         writer.add_scalar("Loss/test", val_loss, epoch)
 
-        if val_loss < lowest_val_loss:
-            lowest_val_loss = val_loss
-            torch.save(model.state_dict(), "./model0.pth")
-
         for metric in metrics:
             message += "\t{}: {}".format(metric.name(), metric.value())
             writer.add_scalar(metric.name() + "/test", metric.value(), epoch)
 
         print(message)
+
+        if val_loss < lowest_val_loss:
+            lowest_val_loss = val_loss
+            torch.save(model.state_dict(), "./model{}.pth".format(val_loss))
+            print(
+                "{} < {}: saving model_state_dict to ./model{}.pth".format(
+                    val_loss, lowest_val_loss, val_loss
+                )
+            )
 
 
 def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, metrics):
