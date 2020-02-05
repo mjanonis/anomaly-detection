@@ -32,8 +32,8 @@ def fit(
     """
 
     writer = SummaryWriter()
+    lowest_val_loss = 100
     for epoch in range(start_epoch, n_epochs):
-        lowest_val_loss = 100
 
         # Train stage
         train_loss, metrics = train_epoch(
