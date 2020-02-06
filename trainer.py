@@ -68,7 +68,7 @@ def fit(
 
         if val_loss < lowest_val_loss:
             print(
-                "{} < {}: saving model_state_dict to ./model.pth".format(
+                "{:.6f} < {:.6f}: saving model_state_dict to ./model.pth".format(
                     val_loss, lowest_val_loss
                 )
             )
