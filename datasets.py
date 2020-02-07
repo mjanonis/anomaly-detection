@@ -60,14 +60,14 @@ def train_test_csv(root, train_size=0.8):
         else:
             pairs.append([filepaths[i], filepaths[i - 1]])
 
-    shuffle(pairs)
-
     train_samples = int(train_size * len(pairs))
 
     # Generate the training .csv
     with open("train.csv", "w") as csvfile:
+        train = pairs[:train_samples].copy()
+        shuffle(train)
         writer = csv.writer(csvfile)
-        writer.writerows(pairs[:train_samples])
+        writer.writerows(train)
 
     # Generate the testing .csv
 
@@ -90,6 +90,7 @@ def train_test_csv(root, train_size=0.8):
             pair.append(target)
 
     with open("test.csv", "w") as csvfile:
+        shuffle(test)
         writer = csv.writer(csvfile)
         writer.writerows(test)
 
