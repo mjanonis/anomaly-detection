@@ -42,7 +42,7 @@ IMAGE, POSITIVE_PAIR
 """
 
 
-def train_test_csv(root, train_size=0.8):
+def siamses_train_test_csv(root, train_size=0.8):
     # Get all the filepaths of the images
     filepaths = []
     pairs = []
@@ -93,6 +93,48 @@ def train_test_csv(root, train_size=0.8):
         shuffle(test)
         writer = csv.writer(csvfile)
         writer.writerows(test)
+
+
+# Outputs all pairs to a .csv file
+def triplet_train_test_csv(root, train_size=0.8):
+    # Get all the filepaths of the images
+    filepaths = []
+    pairs = []
+    for subdir, dirs, files in os.walk(root):
+        for file in files:
+            filepath = subdir + os.sep + file
+            filepaths.append(filepath)
+
+    # Sort the filenames
+    filepaths.sort(key=lambda f: int(re.sub("\D", "", f)))
+
+    for i in range(len(filepaths)):
+        if i % 2 == 0:
+            pairs.append([filepaths[i], filepaths[i + 1]])
+
+    train_samples = int(train_size * len(pairs))
+    shuffle(pairs)
+
+    # Generate the training .csv
+    with open("triplet_train.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(pairs[:train_samples])
+
+    # Generate anchor, positive, negative triplets
+    test = pairs[train_samples:]
+    test_set = []
+    for idx in range(0, (len(pairs) - train_samples) * 2):
+        anchor = test[idx // 2][idx % 2]
+        positive = test[idx // 2][(idx + 1) % 2]
+        n_idx = idx
+        while n_idx == idx:
+            n_idx = np.random.randint(0, (len(pairs) - train_samples) * 2)
+        negative = test[n_idx // 2][(idx + 1) % 2]
+        test_set.append((anchor, positive, negative))
+
+    with open("triplet_test.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(test_set)
 
 
 class SiameseXRayParcels(Dataset):
@@ -201,3 +243,128 @@ class SiameseXRayParcels(Dataset):
     def __len__(self):
         return len(self.pairs)
 
+
+class TripletXRayParcels(Dataset):
+    def __init__(self, pair_csv, image_size=224, train=True, transform=False):
+        self.train = train
+        self.transform = transform
+        self.pairs = []
+        self.image_size = image_size
+
+        # Read the .csv
+        with open(pair_csv, newline="") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                self.pairs.append(row)
+
+    def __getitem__(self, index):
+        # Prepare the triplet
+        if self.train:
+            anchor = cv2.imread(self.pairs[index // 2][index % 2])
+            positive = cv2.imread(self.pairs[index // 2][(index + 1) % 2])
+            n_ind = index
+            while n_ind == index:
+                n_ind = np.random.randint(0, len(self.pairs) * 2)
+            negative = cv2.imread(self.pairs[n_ind // 2][(index + 1) % 2])
+        else:
+            anchor = cv2.imread(self.pairs[index][0])
+            positive = cv2.imread(self.pairs[index][1])
+            negative = cv2.imread(self.pairs[index][2])
+
+        # Trim the images
+        anchor, positive = trim_xray_images(
+            anchor, positive, self.image_size + CROP_MARGIN, 1
+        )
+        _, negative = trim_xray_images(
+            anchor, negative, self.image_size + CROP_MARGIN, 0
+        )
+
+        # Get maximum crop size
+        CROP_TOP_MAX_A = anchor.shape[0] - self.image_size
+        CROP_TOP_MAX_P = positive.shape[0] - self.image_size
+        CROP_TOP_MAX_N = negative.shape[0] - self.image_size
+
+        CROP_LEFT_MAX_A = anchor.shape[1] - self.image_size
+        CROP_LEFT_MAX_P = positive.shape[1] - self.image_size
+        CROP_LEFT_MAX_N = negative.shape[1] - self.image_size
+
+        if self.train:
+            if self.transform:
+                # Apply random cropping
+                top_a = np.random.randint(0, CROP_TOP_MAX_A)
+                top_p = np.random.randint(0, CROP_TOP_MAX_P)
+                top_n = np.random.randint(0, CROP_TOP_MAX_N)
+
+                left_a = np.random.randint(0, CROP_LEFT_MAX_A)
+                # Anchor and positive must be cropped from the same X coordinate
+                left_p = left_a
+                left_n = np.random.randint(0, CROP_LEFT_MAX_N)
+
+                anchor = anchor[
+                    top_a : self.image_size + top_a, left_a : self.image_size + left_a
+                ]
+                positive = positive[
+                    top_p : self.image_size + top_p, left_p : self.image_size + left_p
+                ]
+                negative = negative[
+                    top_n : self.image_size + top_n, left_n : self.image_size + left_n
+                ]
+
+            else:
+                # Apply a center crop
+                top_a = CROP_TOP_MAX_A // 2
+                top_p = CROP_TOP_MAX_P // 2
+                top_n = CROP_TOP_MAX_N // 2
+
+                left_a = CROP_LEFT_MAX_A // 2
+                left_p = CROP_LEFT_MAX_P // 2
+                left_n = CROP_LEFT_MAX_N // 2
+
+                anchor = anchor[
+                    top_a : self.image_size + top_a, left_a : self.image_size + left_a
+                ]
+                positive = positive[
+                    top_p : self.image_size + top_p, left_p : self.image_size + left_p
+                ]
+                negative = negative[
+                    top_n : self.image_size + top_n, left_n : self.image_size + left_n
+                ]
+
+        else:
+            # Apply a center crop
+            top_a = CROP_TOP_MAX_A // 2
+            top_p = CROP_TOP_MAX_P // 2
+            top_n = CROP_TOP_MAX_N // 2
+
+            left_a = CROP_LEFT_MAX_A // 2
+            left_p = CROP_LEFT_MAX_P // 2
+            left_n = CROP_LEFT_MAX_N // 2
+
+            anchor = anchor[
+                top_a : self.image_size + top_a, left_a : self.image_size + left_a
+            ]
+            positive = positive[
+                top_p : self.image_size + top_p, left_p : self.image_size + left_p
+            ]
+            negative = negative[
+                top_n : self.image_size + top_n, left_n : self.image_size + left_n
+            ]
+
+        # Normalize using the mean and std of ImageNet
+        norm = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+        # Convert the images to tensors and return
+        return (
+            (
+                norm(to_tensor(anchor)),
+                norm(to_tensor(positive)),
+                norm(to_tensor(negative)),
+            ),
+            [],
+        )
+
+    def __len__(self):
+        if self.train:
+            return len(self.pairs * 2)
+        else:
+            return len(self.pairs)
