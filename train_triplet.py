@@ -13,7 +13,7 @@ import numpy as np
 cuda = torch.cuda.is_available()
 from networks import ResNextEmbeddingNet, TripletNet
 from datasets import TripletXRayParcels
-from losses import TripletLoss
+from torch.nn import TripletMarginLoss
 from metrics import TripletAccumulatedDistanceAccuracyMetric
 
 triplet_train_dataset = TripletXRayParcels(
@@ -37,7 +37,7 @@ model = TripletNet(embedding_net)
 if cuda:
     model.cuda()
 
-loss_fn = TripletLoss(margin)
+loss_fn = TripletMarginLoss(margin=margin)
 lr = 1e-3
 optimizer = optim.Adam(model.parameters(), lr=lr)
 scheduler = lr_scheduler.StepLR(optimizer, 1, gamma=0.99, last_epoch=-1)
