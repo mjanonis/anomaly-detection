@@ -92,7 +92,6 @@ class TripletAccumulatedDistanceAccuracyMetric(Metric):
         dist_pos = distance.PairwiseDistance().forward(outputs[0], outputs[1])
         dist_neg = distance.PairwiseDistance().forward(outputs[0], outputs[2])
         pred = dist_pos.flatten() < dist_neg.flatten()
-        print(dist_pos, dist_neg)
         self.correct += sum(pred == True)
         self.total += pred.size(0)
         return self.value()
