@@ -14,6 +14,7 @@ cuda = torch.cuda.is_available()
 from networks import ResNextEmbeddingNet, TripletNet
 from datasets import TripletXRayParcels
 from losses import TripletLoss
+from metrics import TripletAccumulatedDistanceAccuracyMetric
 
 triplet_train_dataset = TripletXRayParcels(
     "triplet_train.csv", train=True, transform=True
@@ -53,4 +54,5 @@ fit(
     n_epochs,
     cuda,
     log_interval,
+    [TripletAccumulatedDistanceAccuracyMetric()],
 )

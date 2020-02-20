@@ -76,3 +76,33 @@ class AccumulatedDistanceAccuracyMetric(Metric):
 
     def name(self):
         return "Accuracy"
+
+
+class TripletAccumulatedDistanceAccuracyMetric(Metric):
+    """
+    If the distance between the anchor and the positive is less than the distance between the anchor and the negative,
+    classify as positive; else negative
+    """
+
+    def __init__(self):
+        self.correct = 0
+        self.total = 0
+
+    def __call__(self, outputs, target, loss):
+        dist_pos = distance.PairwiseDistance().forward(outputs[0], outputs[1])
+        dist_neg = distance.PairwiseDistance().forward(outputs[0], outputs[2])
+        pred = dist_pos.flatten() < dist_neg.flatten()
+        print(dist_pos, dist_neg)
+        self.correct += sum(pred == True)
+        self.total += pred.size(0)
+        return self.value()
+
+    def reset(self):
+        self.correct = 0
+        self.total = 0
+
+    def value(self):
+        return 100 * float(self.correct) / self.total
+
+    def name(self):
+        return "Accuracy"
