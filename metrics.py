@@ -1,6 +1,10 @@
-# SPDX-License-Identifier: BSD-3-Clause
-# Copyright (c) 2019, Adam Bielski
-# Copyright (c) 2020, Martynas Janonis
+# SPDX-License-Identifier: EUPL-1.2
+
+# Unmodified code written by Adam Bielski is licensed under the BSD-3-Clause license
+
+# All further additions and modifications: Copyright (c) 2020, Martynas Janonis
+
+# Licensed under the EUPL-1.2-or-later
 
 import numpy as np
 from torch.nn.modules import distance

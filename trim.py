@@ -1,4 +1,7 @@
+# SPDX-License-Identifier: EUPL-1.2
 # Copyright (c) 2020, Martynas Janonis
+
+# Licensed under the EUPL-1.2-or-later
 
 import cv2
 import numpy as np
