@@ -10,12 +10,13 @@ import torch
 from torch.optim import lr_scheduler
 import torch.optim as optim
 from torch.autograd import Variable
+from torchvision.models import resnext101_32x8d, densenet201
 
 from trainer import fit
 import numpy as np
 
 cuda = torch.cuda.is_available()
-from networks import ResNextEmbeddingNet, TripletNet
+from networks import EmbeddingNet, TripletNet
 from datasets import TripletXRayParcels
 from torch.nn import TripletMarginLoss
 from metrics import TripletAccumulatedDistanceAccuracyMetric
@@ -36,7 +37,7 @@ triplet_test_loader = torch.utils.data.DataLoader(
 )
 
 margin = 2.0
-embedding_net = ResNextEmbeddingNet()
+embedding_net = EmbeddingNet(resnext101_32x8d(pretrained=True))
 model = TripletNet(embedding_net)
 if cuda:
     model.cuda()

@@ -11,31 +11,10 @@ import torch.nn.functional as F
 import torchvision
 
 
-class ResNextEmbeddingNet(nn.Module):
-    def __init__(self):
-        super(ResNextEmbeddingNet, self).__init__()
-        self.convnet = torchvision.models.resnext101_32x8d(pretrained=True)
-
-        # Strip the classification layer
-        self.convnet = nn.Sequential(*(list(self.convnet.children())[:-1]))
-        # Add an avg pooling layer (need output shape of [?, 1024, 1, 1])
-        self.aavgp3d = nn.AdaptiveAvgPool3d(output_size=(1024, 1, 1))
-        self.flat = nn.Flatten()
-
-    def forward(self, x):
-        output = self.convnet(x)
-        output = self.aavgp3d(output)
-        output = self.flat(output)
-        return output
-
-    def get_embedding(self, x):
-        return self.forward(x)
-
-
-class DenseNetEmbeddingNet(nn.Module):
-    def __init__(self):
-        super(DenseNetEmbeddingNet, self).__init__()
-        self.convnet = torchvision.models.densenet201(pretrained=True)
+class EmbeddingNet(nn.Module):
+    def __init__(self, network):
+        super().__init__()
+        self.convnet = network
 
         # Strip the classification layer
         self.convnet = nn.Sequential(*(list(self.convnet.children())[:-1]))

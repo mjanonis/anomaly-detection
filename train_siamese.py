@@ -10,12 +10,13 @@ import torch
 from torch.optim import lr_scheduler
 import torch.optim as optim
 from torch.autograd import Variable
+from torchvision.models import resnext101_32x8d, densenet201
 
 from trainer import fit
 import numpy as np
 
 cuda = torch.cuda.is_available()
-from networks import ResNextEmbeddingNet, SiameseNet
+from networks import EmbeddingNet, SiameseNet
 from datasets import SiameseXRayParcels
 from losses import ContrastiveLoss
 from metrics import AccumulatedDistanceAccuracyMetric
@@ -32,7 +33,7 @@ siamese_test_loader = torch.utils.data.DataLoader(
 )
 
 margin = 2.0
-embedding_net = ResNextEmbeddingNet()
+embedding_net = EmbeddingNet(resnext101_32x8d(pretrained=True))
 model = SiameseNet(embedding_net)
 if cuda:
     model.cuda()
