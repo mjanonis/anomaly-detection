@@ -78,6 +78,8 @@ def fit(
             )
             lowest_val_loss = val_loss
             torch.save(model.state_dict(), "./model.pth")
+        
+        writer.flush()
 
 
 def train_epoch(train_loader, model, loss_fn, optimizer, cuda, log_interval, metrics):
