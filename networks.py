@@ -7,8 +7,6 @@
 # Licensed under the EUPL-1.2-or-later
 
 import torch.nn as nn
-import torch.nn.functional as F
-import torchvision
 
 
 class EmbeddingNet(nn.Module):

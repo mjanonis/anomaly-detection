@@ -100,4 +100,3 @@ def trim_xray_images(img1, img2, image_size, label):
     y2 = max(y2, 0)
 
     return img1[y1 : y1 + h1, x1 : x1 + w1], img2[y2 : y2 + h2, x2 : x2 + w2]
-

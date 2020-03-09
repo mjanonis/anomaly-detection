@@ -6,7 +6,6 @@
 
 # Licensed under the EUPL-1.2-or-later
 
-import numpy as np
 from torch.nn.modules import distance
 
 

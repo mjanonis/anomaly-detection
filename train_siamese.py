@@ -9,11 +9,9 @@
 import torch
 from torch.optim import lr_scheduler
 import torch.optim as optim
-from torch.autograd import Variable
 from torchvision.models import resnext101_32x8d, densenet201
 
 from trainer import fit
-import numpy as np
 
 cuda = torch.cuda.is_available()
 from networks import EmbeddingNet, SiameseNet

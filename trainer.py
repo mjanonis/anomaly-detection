@@ -78,7 +78,7 @@ def fit(
             )
             lowest_val_loss = val_loss
             torch.save(model.state_dict(), "./model.pth")
-        
+
         writer.flush()
 
 

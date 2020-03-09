@@ -238,4 +238,3 @@ def SemihardNegativeTripletSelector(margin, cpu=False):
         negative_selection_fn=lambda x: semihard_negative(x, margin),
         cpu=cpu,
     )
-
