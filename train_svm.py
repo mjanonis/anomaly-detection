@@ -110,6 +110,6 @@ for epoch in range(n_epochs):
         )
     )
 
-    # Save the model if Kappa is larger
+    # Save the model if F1 is larger
     if f1_score(y_true, y_pred) > highest_f1:
         dump(svm, "svm.joblib")
