@@ -31,6 +31,7 @@ xray_test_loader = torch.utils.data.DataLoader(
 embedding_net = EmbeddingNet(densenet201())
 model = TripletNet(embedding_net)
 model.load_state_dict(torch.load("triplet_densenet201_m2.pth", map_location=device))
+model.to(device)
 model.eval()
 
 # Initialize the SVM
