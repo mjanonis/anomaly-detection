@@ -85,7 +85,7 @@ for epoch in range(n_epochs):
         target = target if len(target) > 0 else None
         if not type(data) in (tuple, list):
             data = (data,)
-           
+
         data = tuple(d.to(device) for d in data)
         if target is not None:
             target = target.to(device)
