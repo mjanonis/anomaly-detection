@@ -4,6 +4,7 @@
 # Licensed under the EUPL-1.2-or-later
 
 import torch
+import sys
 
 from torchvision.models import resnext101_32x8d, densenet201
 from sklearn.linear_model import SGDClassifier
@@ -61,6 +62,16 @@ for epoch in range(n_epochs):
 
         # Do one epoch of SGD for the SVM
         svm.partial_fit(vectors, target, classes=[0, 1])
+
+        message = "Train: [{}/{} ({:.0f}%)]".format(
+            batch_idx * len(data[0]),
+            len(xray_train_loader.dataset),
+            100.0 * batch_idx / len(xray_train_loader),
+        )
+
+        sys.stdout.write("\x1b[2K")  # Clear to the end of line
+        sys.stdout.write("\r" + message)
+        sys.stdout.flush()
 
     print("Starting validation")
     # Test stage
