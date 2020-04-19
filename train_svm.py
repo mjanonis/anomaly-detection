@@ -5,6 +5,7 @@
 
 import torch
 import sys
+import numpy as np
 
 from torchvision.models import resnext101_32x8d, densenet201
 from sklearn.linear_model import SGDClassifier
@@ -18,7 +19,7 @@ device = torch.device("cuda") if cuda else torch.device("cpu")
 
 xray_train_dataset = XRayParcels("svm_train.csv", train=True, transform=True)
 xray_test_dataset = XRayParcels("svm_test.csv", train=False, transform=False)
-batch_size = 16
+batch_size = 64
 kwargs = {"num_workers": 1, "pin_memory": True} if cuda else {}
 xray_train_loader = torch.utils.data.DataLoader(
     xray_train_dataset, batch_size=batch_size, shuffle=True, **kwargs
@@ -74,6 +75,7 @@ for epoch in range(n_epochs):
         sys.stdout.write("\r" + message)
         sys.stdout.flush()
 
+    print()
     print("Starting validation")
     # Test stage
     # Generate #batch_size vectors to pass as a dataset to the SVM
@@ -93,9 +95,9 @@ for epoch in range(n_epochs):
 
         # Convert from PyTorch tensors to NumPy arrays
         vectors = vectors.detach().cpu().numpy()
-        y_true += target.detach().cpu().numpy()
 
-        y_pred += svm.predict(vectors)
+        y_true = np.append(y_true, target.detach().cpu().numpy())
+        y_pred = np.append(y_pred, svm.predict(vectors))
 
     print(
         "Epoch {}/{}. Validation set: Avg. accuracy: {:.4f}, avg. F1 score: {:.4f}, avg. AUC: {:.4f}, avg. Kappa {:.4f}".format(
