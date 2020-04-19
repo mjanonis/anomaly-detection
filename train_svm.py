@@ -48,17 +48,17 @@ for epoch in range(n_epochs):
         target = target if len(target) > 0 else None
         if not type(data) in (tuple, list):
             data = (data,)
-        if cuda:
-            data = tuple(d.cuda() for d in data)
-            if target is not None:
-                target = target.cuda()
+
+        data = tuple(d.to(device) for d in data)
+        if target is not None:
+            target = target.to(device)
 
         with torch.no_grad():
             vectors = model.embedding_net(*data)
 
         # Convert from PyTorch tensors to NumPy arrays
-        vectors = vectors.numpy()
-        target = target.numpy()
+        vectors = vectors.detach().cpu().numpy()
+        target = target.detach().cpu().numpy()
 
         # Do one epoch of SGD for the SVM
         svm.partial_fit(vectors, target, classes=[0, 1])
@@ -82,17 +82,17 @@ for epoch in range(n_epochs):
         target = target if len(target) > 0 else None
         if not type(data) in (tuple, list):
             data = (data,)
-        if cuda:
-            data = tuple(d.cuda() for d in data)
-            if target is not None:
-                target = target.cuda()
+           
+        data = tuple(d.to(device) for d in data)
+        if target is not None:
+            target = target.to(device)
 
         with torch.no_grad():
             vectors = model.embedding_net(*data)
 
         # Convert from PyTorch tensors to NumPy arrays
-        vectors = vectors.numpy()
-        y_true += target.numpy()
+        vectors = vectors.detach().cpu().numpy()
+        y_true += target.detach().cpu().numpy()
 
         y_pred += svm.predict(vectors)
 
