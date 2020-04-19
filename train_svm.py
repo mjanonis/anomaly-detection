@@ -39,7 +39,7 @@ model.eval()
 svm = SGDClassifier(loss="hinge", verbose=0, class_weight={0: 1, 1: 5}, warm_start=True)
 
 n_epochs = 1
-highest_kappa = 0
+highest_f1 = 0
 
 for epoch in range(n_epochs):
 
@@ -111,5 +111,5 @@ for epoch in range(n_epochs):
     )
 
     # Save the model if Kappa is larger
-    if cohen_kappa_score(y_true, y_pred) > highest_kappa:
+    if f1_score(y_true, y_pred) > highest_f1:
         dump(svm, "svm.joblib")
