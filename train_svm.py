@@ -112,4 +112,6 @@ for epoch in range(n_epochs):
 
     # Save the model if F1 is larger
     if f1_score(y_true, y_pred) > highest_f1:
+        print("F1 score increased, saving model")
         dump(svm, "svm.joblib")
+        highest_f1 = f1_score(y_true, y_pred)
