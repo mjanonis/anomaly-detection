@@ -141,6 +141,31 @@ def triplet_train_test_csv(root, train_size=0.8):
         writer.writerows(test_set)
 
 
+def svm_train_test_csv(root_neg, root_pos, train_size=0.8):
+    # Get all the filepaths of the images
+    filepaths = []
+    for subdir, dirs, files in os.walk(root_neg):
+        for file in files:
+            filepath = subdir + os.sep + file
+            filepaths.append((filepath, 0))
+
+    for subdir, dirs, files in os.walk(root_pos):
+        for file in files:
+            filepath = subdir + os.sep + file
+            filepaths.append((filepath, 1))
+
+    shuffle(filepaths)
+    train_samples = int(train_size * len(filepaths))
+
+    with open("svm_train.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(filepaths[:train_samples])
+
+    with open("svm_test.csv", "w") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(filepaths[train_samples:])
+
+
 class SiameseXRayParcels(Dataset):
     def __init__(self, xray_csv, image_size=224, train=True, transform=False):
         self.train = train
@@ -372,3 +397,55 @@ class TripletXRayParcels(Dataset):
             return len(self.pairs * 2)
         else:
             return len(self.pairs)
+
+
+class XRayParcels(Dataset):
+    def __init__(self, csv_file, image_size=224, train=True, transform=False):
+        self.train = train
+        self.transform = transform
+        self.data = []
+        self.image_size = image_size
+
+        # Read the .csv
+        with open(csv_file, newline="") as csvfile:
+            reader = csv.reader(csvfile)
+            for row in reader:
+                self.data.append(row)
+
+    def __getitem__(self, index):
+        img = cv2.imread(self.data[index][0])
+        label = np.int(self.data[index][1])
+
+        img, _ = trim_xray_images(img, img, self.image_size + CROP_MARGIN, 0)
+
+        CROP_TOP_MAX = img.shape[0] - self.image_size
+        CROP_LEFT_MAX = img.shape[1] - self.image_size
+
+        if self.train:
+            if self.transform:
+                # Apply random cropping
+                top = np.random.randint(0, CROP_TOP_MAX)
+                left = np.random.randint(0, CROP_LEFT_MAX)
+
+                img = img[top : self.image_size + top, left : self.image_size + left]
+
+            else:
+                # Apply a center crop
+                top = CROP_TOP_MAX // 2
+                left = CROP_LEFT_MAX // 2
+
+                img = img[top : self.image_size + top, left : self.image_size + left]
+        else:
+            # Apply a center crop
+            top = CROP_TOP_MAX // 2
+            left = CROP_LEFT_MAX // 2
+
+            img = img[top : self.image_size + top, left : self.image_size + left]
+
+        # Normalize using the mean and std of ImageNet
+        norm = Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+
+        return norm(to_tensor(img)), label
+
+    def __len__(self):
+        return len(self.data)
