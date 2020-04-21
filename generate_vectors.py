@@ -9,6 +9,7 @@ import numpy as np
 import cv2
 import math
 import csv
+import torch
 
 import trim
 
@@ -35,7 +36,8 @@ def generate_vectors(root, dest, model):
         print(len(patches))
         f = open(dest + os.path.splitext(os.path.basename(file))[0] + ".vec", "ab")
         for patch in patches:
-            vec = model(patch).cpu().detach().numpy()
+            with torch.no_grad():
+                vec = model(patch).cpu().detach().numpy()
             np.savetxt(f, vec, delimiter=",")
         f.close()
 

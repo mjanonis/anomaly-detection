@@ -37,7 +37,9 @@ model.to(device)
 model.eval()
 
 # Initialize the SVM
-svm = SGDClassifier(loss="hinge", verbose=0, class_weight={0: 1, 1: 50}, warm_start=True)
+svm = SGDClassifier(
+    loss="hinge", verbose=0, class_weight={0: 1, 1: 50}, warm_start=True, average=True
+)
 scaler = preprocessing.StandardScaler()
 
 n_epochs = 50
