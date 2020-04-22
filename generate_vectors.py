@@ -8,7 +8,6 @@ import re
 import numpy as np
 import cv2
 import math
-import csv
 import torch
 
 import trim
@@ -69,7 +68,3 @@ def produce_patches(path):
             patches.append(norm(to_tensor(window[h][w][0])).unsqueeze(0))
 
     return patches
-
-
-def round_to(num, rnd):
-    return int(math.ceil(num / rnd)) * rnd
