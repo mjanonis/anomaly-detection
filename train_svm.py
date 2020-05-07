@@ -10,7 +10,6 @@ import numpy as np
 from torchvision.models import resnext101_32x8d, densenet201
 from sklearn.linear_model import SGDClassifier
 from sklearn.metrics import f1_score, roc_auc_score, accuracy_score, cohen_kappa_score
-from sklearn import preprocessing
 from networks import EmbeddingNet, TripletNet
 from datasets import XRayParcels
 from joblib import dump, load
@@ -40,7 +39,6 @@ model.eval()
 svm = SGDClassifier(
     loss="hinge", verbose=0, class_weight={0: 1, 1: 50}, warm_start=True, average=True
 )
-scaler = preprocessing.StandardScaler()
 
 n_epochs = 50
 highest_f1 = 0
@@ -65,9 +63,6 @@ for epoch in range(n_epochs):
         # Convert from PyTorch tensors to NumPy arrays
         vectors = vectors.detach().cpu().numpy()
         target = target.detach().cpu().numpy()
-
-        # Scale the vectors
-        vectors = scaler.fit_transform(vectors)
 
         # Do one epoch of SGD for the SVM
         svm.partial_fit(vectors, target, classes=[0, 1])
@@ -102,9 +97,6 @@ for epoch in range(n_epochs):
 
         # Convert from PyTorch tensors to NumPy arrays
         vectors = vectors.detach().cpu().numpy()
-
-        # Scale the vectors
-        vectors = scaler.fit_transform(vectors)
 
         y_true = np.append(y_true, target.detach().cpu().numpy())
         y_pred = np.append(y_pred, svm.predict(vectors))
