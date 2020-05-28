@@ -46,7 +46,7 @@ IMAGE, POSITIVE_PAIR
 """
 
 
-def siamses_train_test_csv(root, train_size=0.8):
+def siamese_train_test_csv(root, train_size=0.8):
     # Get all the filepaths of the images
     filepaths = []
     pairs = []

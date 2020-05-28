@@ -8,19 +8,26 @@ import numpy as np
 
 
 def get_bounding_box(img):
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)  # convert to grayscale
+    # convert to grayscale
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # threshold to get just the signature
+    # threshold to get just the contents
     retval, thresh_gray = cv2.threshold(
         gray, thresh=205, maxval=255, type=cv2.THRESH_BINARY
     )
 
-    # find where the signature is and make a cropped region
-    points = np.argwhere(thresh_gray == 0)  # find where the black pixels are
+    # find where the contents are and make a cropped region
+    
+    # find where the black pixels are
+    points = np.argwhere(thresh_gray == 0)
+    
+    # store them in x,y coordinates instead of row,col indices
     points = np.fliplr(
         points
-    )  # store them in x,y coordinates instead of row,col indices
-    x, y, w, h = cv2.boundingRect(points)  # create a rectangle around those points
+    )
+    
+    # create a rectangle around those points
+    x, y, w, h = cv2.boundingRect(points)
 
     return x, y, w, h
 
